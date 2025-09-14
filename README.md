@@ -5,7 +5,7 @@
 CVEWB is an AI-assisted vulnerability analysis workbench that aggregates critical security information into a single pane of glass. It provides context-aware vulnerability assessment by combining multiple authoritative data sources with intelligent analysis tailored to your specific organizational infrastructure.
 
 ![CVEWB Interface](https://img.shields.io/badge/Status-Active%20Development-green)
-![Python](https://img.shields.io/badge/Python-3.8+-blue)
+![Python](https://img.shields.io/badge/Python-3.13+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
