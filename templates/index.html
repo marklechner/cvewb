@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVEWB - CVE Workbench</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>CVEWB</h1>
+                <span class="nav-subtitle">CVE Workbench</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link active">Analysis</a>
+                <a href="/config" class="nav-link">Configuration</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Input Section -->
+        <div class="analysis-form">
+            <div class="form-header">
+                <h2>Vulnerability Analysis</h2>
+                <p>Enter a CVE identifier to perform comprehensive vulnerability analysis</p>
+            </div>
+            
+            <form id="cveForm" class="form-grid">
+                <div class="input-group">
+                    <label for="cveId" class="form-label">CVE Identifier</label>
+                    <input 
+                        type="text" 
+                        id="cveId" 
+                        name="cveId" 
+                        placeholder="CVE ID (e.g., CVE-2023-12345)" 
+                        class="form-input"
+                        pattern="CVE-\d{4}-\d{4,7}"
+                        required
+                    >
+                    <small class="form-hint">Format: CVE-YYYY-NNNNN</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="component" class="form-label">Component (Optional)</label>
+                    <select id="component" name="component" class="form-select">
+                        <option value="">Select a component...</option>
+                    </select>
+                    <small class="form-hint">Select from configured system components</small>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="aiAnalysis" name="aiAnalysis" class="form-checkbox" checked>
+                        <span class="checkmark"></span>
+                        Enable AI Analysis
+                    </label>
+                    <small class="form-hint">Perform AI-powered risk assessment and recommendations</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                    <i class="fas fa-search"></i>
+                    Start Analysis
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-container" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Analyzing vulnerability data...</p>
+            <div class="loading-steps">
+                <div class="step" data-step="nvd">Fetching NVD data</div>
+                <div class="step" data-step="epss">Getting EPSS scores</div>
+                <div class="step" data-step="kev">Checking KEV database</div>
+                <div class="step" data-step="github">Retrieving GitHub advisories</div>
+                <div class="step" data-step="ai" style="display: none;">Running AI analysis</div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsContainer" style="display: none;">
+            <!-- CVE Header -->
+            <div class="cve-header">
+                <div class="cve-title">
+                    <h1 id="cveTitle"></h1>
+                    <span id="cveId" class="cve-badge"></span>
+                </div>
+                <div class="cve-actions">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-external-link-alt"></i>
+                        View in NVD
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="results-grid">
+                <!-- Left Column -->
+                <div class="results-main">
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab-button active" data-tab="overview">Overview</button>
+                        <button class="tab-button" data-tab="technical">Technical Details</button>
+                        <button class="tab-button" data-tab="impact">Impact</button>
+                        <button class="tab-button" data-tab="mitigation">Mitigation</button>
+                        <button class="tab-button" data-tab="ai" id="aiTab" style="display: none;">AI Analysis</button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <div id="overview" class="tab-panel active">
+                            <div class="overview-content">
+                                <p id="cveDescription"></p>
+                                
+                                <div class="metadata-grid">
+                                    <div class="metadata-item">
+                                        <label>Published</label>
+                                        <span id="publishedDate"></span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label>Last Modified</label>
+                                        <span id="lastModified"></span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label>Status</label>
+                                        <span id="vulnStatus" class="status-badge"></span>
+                                    </div>
+                                </div>
+
+                                <div class="affected-technologies">
+                                    <h3>Affected Technologies</h3>
+                                    <div id="affectedTech" class="tech-badges"></div>
+                                </div>
+
+                                <div class="references-section">
+                                    <h3>References</h3>
+                                    <div id="references" class="references-list"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="technical" class="tab-panel">
+                            <div id="technicalDetails"></div>
+                        </div>
+
+                        <div id="impact" class="tab-panel">
+                            <div id="impactAnalysis"></div>
+                        </div>
+
+                        <div id="mitigation" class="tab-panel">
+                            <div id="mitigationInfo"></div>
+                        </div>
+
+                        <div id="ai" class="tab-panel">
+                            <div id="aiAnalysisResult" class="ai-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <div class="results-sidebar">
+                    <!-- CVSS Score -->
+                    <div class="score-card">
+                        <div class="score-header">
+                            <h3>CVSS Score</h3>
+                        </div>
+                        <div class="score-circle">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle
+                                    class="progress-ring-circle"
+                                    stroke="#e5e7eb"
+                                    stroke-width="8"
+                                    fill="transparent"
+                                    r="52"
+                                    cx="60"
+                                    cy="60"
+                                />
+                                <circle
+                                    id="scoreCircle"
+                                    class="progress-ring-circle progress"
+                                    stroke-width="8"
+                                    fill="transparent"
+                                    r="52"
+                                    cx="60"
+                                    cy="60"
+                                />
+                            </svg>
+                            <div class="score-text">
+                                <span id="cvssScore" class="score-number">0.0</span>
+                                <span class="score-label">Score</span>
+                            </div>
+                        </div>
+                        <div id="severityBadge" class="severity-badge"></div>
+                    </div>
+
+                    <!-- EPSS Information -->
+                    <div class="info-card">
+                        <h3>Exploitation Probability</h3>
+                        <div class="metric-row">
+                            <label>EPSS Score</label>
+                            <span id="epssScore">-</span>
+                        </div>
+                        <div class="metric-row">
+                            <label>Percentile</label>
+                            <span id="epssPercentile">-</span>
+                        </div>
+                    </div>
+
+                    <!-- KEV Status -->
+                    <div class="info-card">
+                        <h3>Known Exploited Vulnerability</h3>
+                        <div id="kevStatus" class="kev-status">
+                            <span class="status-indicator"></span>
+                            <span id="kevText">Not in KEV catalog</span>
+                        </div>
+                        <div id="kevDetails" style="display: none;">
+                            <div class="metric-row">
+                                <label>Due Date</label>
+                                <span id="kevDueDate">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Component Context -->
+                    <div id="componentCard" class="info-card" style="display: none;">
+                        <h3>Component Context</h3>
+                        <div id="componentInfo"></div>
+                    </div>
+
+                    <!-- Additional Sources -->
+                    <div class="info-card">
+                        <h3>Additional Sources</h3>
+                        <div class="sources-list">
+                            <a href="#" id="nvdLink" class="source-link" target="_blank">
+                                <i class="fas fa-database"></i>
+                                NVD Database
+                            </a>
+                            <div id="githubLink" class="source-link" style="display: none;">
+                                <i class="fab fa-github"></i>
+                                GitHub Advisory
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorContainer" class="error-container" style="display: none;">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Analysis Failed</h3>
+            <p id="errorMessage"></p>
+            <button class="btn btn-primary" onclick="location.reload()">
+                <i class="fas fa-redo"></i>
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

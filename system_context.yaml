@@ -1,0 +1,25 @@
+# This file provides additional context for where the CVE was found.
+
+components:
+  - name: Marketing Frontend
+    description: The webfrontend written in React deployed as node:14-alpine containervia Vercel and behind cloudflare. The website does not provide login or user accounts and just provides static contents.
+
+  - name: Product Frontend
+    description: The webfrontend written in React deployed as node:14-alpine containervia Vercel and behind cloudflare. The website offers login and user accounts via Okta integration and also serves PII and sensitive user data via the product API.
+
+  - name: Product API
+    description: The product API is a REST API written in Go and deployed as python FastAPI container using 3.11-slim image via GKS on GCP and behind cloudflare. The API offers login and user accounts via Okta integration and serves PII and sensitive user data.
+
+  - name: Backoffice Tools
+    description: The backoffice tools are written in Python and deployed as python:3.11-slim containers via GKS on GCP in a separate and dedicated VPC with no direct ingress connectivity. These are various tools that handle data processing and cleanup tasks. Some connect to the product API to fetch and update data.
+
+security architecture:
+  - The marketing frontend is publicly accessible via the internet and is protected by Cloudflare. It does not handle any sensitive data or user accounts.
+  - The product frontend is also publicly accessible via the internet and is protected by Cloudflare. It handles user accounts and sensitive data, and uses Okta for authentication and authorization.
+  - The product API is publicly accessible via the internet and is protected by Cloudflare. It handles user accounts and sensitive data, and uses Okta for authentication and authorization. It communicates with a PostgreSQL database hosted on AWS RDS, which is not publicly accessible and can only be accessed from the product API servers.
+  - Denial of service type of vulnerabilities in general are not that relevant for this setup as the infrastructure is designed to handle high traffic loads via horizontal scaling, rate limits and monitoring/alerting
+  - The backoffice tools are not publicly accessible and can only be accessed from within the dedicated VPC. They do not handle user accounts or sensitive data directly, but may connect to the product API to fetch and update data.
+  - GCP WAF, IDS/IPS, and logging are enabled for all components to monitor and protect against potential threats.
+  - Cloudflare is configured with strict security settings, including DDoS protection, rate limiting, and web application firewall rules to protect against common web vulnerabilities.
+  - MFA optionally via SSO integration is enforced for all user accounts via Okta to enhance security for both internal and external users.
+  - Autoscaling, automated backups are enabled for all components to ensure high availability and performance during peak loads.
